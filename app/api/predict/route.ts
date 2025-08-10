@@ -4,18 +4,42 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     
-    // Validate that all required fields exist
-    const requiredFields = [
-      'age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 
-      'restecg', 'thalach', 'exang', 'oldpeak', 'slope', 'ca', 'thal'
-    ];
-    
-    for (const field of requiredFields) {
-      if (!(field in body)) {
-        return NextResponse.json(
-          { error: `Missing required field: ${field}` },
-          { status: 400 }
-        );
+    // Validate mode
+    if (!body.mode || !['detailed', 'coarse'].includes(body.mode)) {
+      return NextResponse.json(
+        { error: 'Mode must be "detailed" or "coarse"' },
+        { status: 400 }
+      );
+    }
+
+    // Validate required fields based on mode
+    if (body.mode === 'detailed') {
+      const requiredFields = [
+        'age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 
+        'restecg', 'thalach', 'exang', 'oldpeak', 'slope', 'ca', 'thal'
+      ];
+      
+      for (const field of requiredFields) {
+        if (!(field in body)) {
+          return NextResponse.json(
+            { error: `Missing required field: ${field}` },
+            { status: 400 }
+          );
+        }
+      }
+    } else if (body.mode === 'coarse') {
+      const requiredFields = [
+        'age', 'sex_cat', 'cp_cat', 'trestbps_bin', 'chol_bin', 'fbs_cat',
+        'restecg_cat', 'thalach_bin', 'exang_cat', 'oldpeak_bin', 'slope_cat', 'ca_bin', 'thal_cat'
+      ];
+      
+      for (const field of requiredFields) {
+        if (!(field in body)) {
+          return NextResponse.json(
+            { error: `Missing required field: ${field}` },
+            { status: 400 }
+          );
+        }
       }
     }
 

@@ -1,106 +1,180 @@
-# Cardio Frontend - Heart Disease Risk Assessment
+# CardioNet - การประเมินความเสี่ยงโรคหัวใจ
 
-A modern Next.js 14+ application for heart disease risk assessment using machine learning with an interactive question-by-question interface.
+แอปพลิเคชันประเมินความเสี่ยงโรคหัวใจด้วยปัญญาประดิษฐ์ พัฒนาด้วย Next.js, TypeScript และ Tailwind CSS
 
-## Features
+## คุณสมบัติ
 
-- **Interactive Question Flow**: Step-by-step questionnaire with smooth animations
-- **Modern Dark Theme**: Deep blue gradient background with glassmorphism effects
-- **Progress Tracking**: Visual progress bar showing completion status
-- **Responsive Design**: Works perfectly on desktop and mobile devices
-- **Real-time Validation**: Input validation with helpful error messages
-- **Accessible UI**: Clean, modern interface with proper contrast and readability
-- **Integration with FastAPI backend**: Seamless API communication
+- **สองโหมดการกรอกข้อมูล:**
+  - **แบบละเอียด:** กรอกข้อมูลตัวเลขจริง (อายุ, ความดัน, โคเลสเตอรอล, etc.)
+  - **แบบหยาบ:** เลือกจากตัวเลือกที่กำหนดไว้ (เหมาะสำหรับผู้ที่ไม่มีข้อมูลตัวเลข)
 
-## UI/UX Highlights
+- **UI/UX ที่เป็นมิตรกับผู้สูงอายุ:**
+  - ตัวหนังสือใหญ่ อ่านง่าย
+  - ปุ่มใหญ่ กดง่าย
+  - สี contrast สูง
+  - การจัดวางแบบ Card layout
 
-### Design Theme
-- **Color Scheme**: Deep dark blue gradient (`from-slate-900 via-blue-900 to-slate-900`)
-- **Glassmorphism**: Semi-transparent cards with backdrop blur effects
-- **Smooth Animations**: Fade-in effects and transition animations
-- **Modern Typography**: Clean, readable fonts with proper hierarchy
+- **ฟีเจอร์เสริม:**
+  - สวิตช์สลับโหมดได้ตลอด
+  - ปุ่มกรอกตัวอย่างข้อมูล
+  - ปุ่มล้างค่า
+  - แสดงผลลัพธ์แบบ real-time
+  - Progress bar แสดงความเสี่ยง
 
-### Question Interface
-- **One Question at a Time**: Focused, distraction-free experience
-- **Progress Indicator**: Shows current question and completion percentage
-- **Multiple Choice Options**: Easy-to-select buttons for categorical data
-- **Number Inputs**: Validated numeric inputs with helpful hints
-- **Navigation**: Previous/Next buttons with smooth transitions
+## การติดตั้ง
 
-### User Experience
-- **Loading States**: Animated loading indicators during API calls
-- **Error Handling**: Clear error messages with helpful guidance
-- **Result Display**: Beautiful result cards with color-coded risk levels
-- **Reset Functionality**: Easy way to start over with example values
+1. Clone repository:
+```bash
+git clone <repository-url>
+cd cardio-frontend
+```
 
-## Setup
-
-1. Install dependencies:
+2. ติดตั้ง dependencies:
 ```bash
 npm install
 ```
 
-2. Create `.env.local` file:
+3. สร้างไฟล์ `.env.local` และตั้งค่า backend URL:
 ```bash
-BACKEND_URL=https://<your-railway-subdomain>.up.railway.app
+cp env.example .env.local
+# แก้ไข BACKEND_URL ใน .env.local ให้ชี้ไปที่ backend server
 ```
 
-3. Run development server:
+4. รัน development server:
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+5. เปิดเบราว์เซอร์ไปที่ [http://localhost:3000](http://localhost:3000)
 
-## Question Flow
+## การใช้งาน
 
-The application presents 13 medical questions in sequence:
+### ขั้นตอนที่ 1: เลือกโหมด
+- หน้าแรกจะถามว่าคุณมีข้อมูลแบบละเอียดหรือไม่
+- เลือก "มี (กรอกละเอียด)" หรือ "ไม่มี (กรอกแบบตัวเลือกง่าย)"
 
-1. **Age** - Numeric input (1-120 years)
-2. **Gender** - Male/Female selection
-3. **Chest Pain Type** - 4 options from typical angina to asymptomatic
-4. **Resting Blood Pressure** - Numeric input (80-220 mm Hg)
-5. **Serum Cholesterol** - Numeric input (100-600 mg/dl)
-6. **Fasting Blood Sugar** - Yes/No for >120 mg/dl
-7. **Resting ECG** - 3 options from normal to left ventricular hypertrophy
-8. **Max Heart Rate** - Numeric input (60-220 bpm)
-9. **Exercise Induced Angina** - Yes/No selection
-10. **ST Depression** - Numeric input with decimal precision (0.0-6.0)
-11. **ST Slope** - 3 options: upsloping, flat, downsloping
-12. **Major Vessels** - 5 options (0-4 vessels)
-13. **Thalassemia** - 3 options: fixed defect, normal, reversible defect
+### ขั้นตอนที่ 2: กรอกข้อมูล
+- กรอกข้อมูลตามที่ระบบถาม
+- ข้อมูลที่จำเป็นจะแสดงเครื่องหมาย *
+- ระบบจะตรวจสอบความถูกต้องของข้อมูล
 
-## Deployment on Vercel
+### ขั้นตอนที่ 3: ดูผลลัพธ์
+- กดปุ่ม "ประเมินความเสี่ยง"
+- ระบบจะแสดงผลการประเมินและความเสี่ยงเป็นเปอร์เซ็นต์
+- มี progress bar แสดงระดับความเสี่ยง
 
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Set environment variable `BACKEND_URL` in Vercel dashboard
-4. Deploy automatically
+## โครงสร้างโปรเจกต์
 
-## API Routes
+```
+cardio-frontend/
+├── app/
+│   ├── components/
+│   │   ├── DetailedForm.tsx    # ฟอร์มแบบละเอียด
+│   │   ├── CoarseForm.tsx      # ฟอร์มแบบหยาบ
+│   │   └── Summary.tsx         # แสดงสรุปข้อมูล
+│   ├── api/
+│   │   └── predict/
+│   │       └── route.ts        # API proxy
+│   ├── types.ts                # Type definitions
+│   ├── page.tsx                # หน้าหลัก
+│   ├── layout.tsx              # Layout หลัก
+│   └── globals.css             # Global styles
+├── public/                     # Static files
+├── package.json
+├── tsconfig.json
+└── README.md
+```
 
-- `POST /api/predict`: Proxies requests to the backend API
+## API Endpoints
 
-## Tech Stack
+### POST /api/predict
+ส่งข้อมูลเพื่อประเมินความเสี่ยงโรคหัวใจ
 
-- Next.js 14+ (App Router)
-- TypeScript
-- Tailwind CSS
-- React Hooks (useState, useEffect)
-- FastAPI Backend (separate repository)
+**Request Body (Detailed Mode):**
+```json
+{
+  "mode": "detailed",
+  "age": 55,
+  "sex": 1,
+  "cp": 2,
+  "trestbps": 130,
+  "chol": 250,
+  "fbs": 0,
+  "restecg": 0,
+  "thalach": 150,
+  "exang": 0,
+  "oldpeak": 1.0,
+  "slope": 1,
+  "ca": 0,
+  "thal": 2
+}
+```
 
-## Accessibility Features
+**Request Body (Coarse Mode):**
+```json
+{
+  "mode": "coarse",
+  "age": 58,
+  "sex_cat": "ชาย",
+  "cp_cat": "เจ็บหน้าอกแบบไม่คงที่",
+  "trestbps_bin": "120-139",
+  "chol_bin": "200-239",
+  "fbs_cat": "ปกติ",
+  "restecg_cat": "ผิดปกติเล็กน้อย",
+  "thalach_bin": "150-179",
+  "exang_cat": "ไม่เจ็บหน้าอกตอนออกแรง",
+  "oldpeak_bin": "0.1-1.9",
+  "slope_cat": "แบน",
+  "ca_bin": "ไม่มีเส้นเลือดตีบ",
+  "thal_cat": "ปกติ"
+}
+```
 
-- High contrast color scheme
-- Clear visual hierarchy
-- Keyboard navigation support
-- Screen reader friendly
-- Responsive design for all screen sizes
+**Response:**
+```json
+{
+  "prediction": "เสี่ยงเป็นโรคหัวใจ",
+  "risk_score": 0.75
+}
+```
 
-## Performance Optimizations
+## การพัฒนา
 
-- Optimized build process
-- Efficient state management
-- Smooth animations with CSS transitions
-- Minimal bundle size
-- Fast loading times 
+### Scripts ที่มี
+- `npm run dev` - รัน development server
+- `npm run build` - build สำหรับ production
+- `npm run start` - รัน production server
+- `npm run lint` - ตรวจสอบ code quality
+
+### เทคโนโลยีที่ใช้
+- **Frontend:** Next.js 15, React 19, TypeScript
+- **Styling:** Tailwind CSS 4
+- **Backend:** FastAPI (แยกโปรเจกต์)
+
+## การ Deploy
+
+1. Build โปรเจกต์:
+```bash
+npm run build
+```
+
+2. รัน production server:
+```bash
+npm run start
+```
+
+หรือ deploy บน Vercel:
+```bash
+npm install -g vercel
+vercel
+```
+
+## หมายเหตุ
+
+- ผลการประเมินเป็นการประเมินเบื้องต้นเท่านั้น
+- กรุณาปรึกษาแพทย์เพื่อการวินิจฉัยที่ถูกต้อง
+- ระบบต้องการ backend server ที่รัน FastAPI เพื่อทำงานได้สมบูรณ์
+
+## License
+
+MIT License 
