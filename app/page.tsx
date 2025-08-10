@@ -1,103 +1,212 @@
-import Image from "next/image";
+'use client';
+import { useState } from 'react';
+
+type FormData = {
+  age: number;
+  sex: number;
+  cp: number;
+  trestbps: number;
+  chol: number;
+  fbs: number;
+  restecg: number;
+  thalach: number;
+  exang: number;
+  oldpeak: number;
+  slope: number;
+  ca: number;
+  thal: number;
+};
+
+type ValidationErrors = Partial<Record<keyof FormData, string>>;
+
+const initialFormData: FormData = {
+  age: 55,
+  sex: 1,
+  cp: 2,
+  trestbps: 130,
+  chol: 250,
+  fbs: 0,
+  restecg: 0,
+  thalach: 150,
+  exang: 0,
+  oldpeak: 1.0,
+  slope: 1,
+  ca: 0,
+  thal: 2
+};
+
+type FieldConfig = {
+  label: string;
+  min: number;
+  max: number;
+  step?: number;
+  hint: string;
+};
+
+const fieldConfig: Record<string, FieldConfig> = {
+  age: { label: 'Age', min: 1, max: 120, hint: 'Age in years' },
+  sex: { label: 'Sex', min: 0, max: 1, hint: '0: Female, 1: Male' },
+  cp: { label: 'Chest Pain Type', min: 0, max: 3, hint: 'Chest pain type (0-3)' },
+  trestbps: { label: 'Resting Blood Pressure', min: 80, max: 220, hint: 'mm Hg' },
+  chol: { label: 'Serum Cholesterol', min: 100, max: 600, hint: 'mg/dl' },
+  fbs: { label: 'Fasting Blood Sugar', min: 0, max: 1, hint: '0: ≤120 mg/dl, 1: >120 mg/dl' },
+  restecg: { label: 'Resting ECG', min: 0, max: 2, hint: 'Resting ECG results (0-2)' },
+  thalach: { label: 'Max Heart Rate', min: 60, max: 220, hint: 'Maximum heart rate achieved' },
+  exang: { label: 'Exercise Induced Angina', min: 0, max: 1, hint: '0: No, 1: Yes' },
+  oldpeak: { label: 'ST Depression', min: 0, max: 6, step: 0.1, hint: 'ST depression induced by exercise' },
+  slope: { label: 'ST Slope', min: 0, max: 2, hint: 'Slope of peak exercise ST segment' },
+  ca: { label: 'Major Vessels', min: 0, max: 4, hint: 'Number of major vessels colored by fluoroscopy' },
+  thal: { label: 'Thalassemia', min: 1, max: 3, hint: '1: Fixed defect, 2: Normal, 3: Reversible defect' }
+};
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{ prediction: number; risk_score: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const validateField = (field: keyof FormData, value: number): string | null => {
+    const config = fieldConfig[field];
+    if (value < config.min || value > config.max) {
+      return `Must be between ${config.min} and ${config.max}`;
+    }
+    return null;
+  };
+
+  const handleInputChange = (field: keyof FormData, value: string) => {
+    const numValue = field === 'oldpeak' ? parseFloat(value) : parseInt(value);
+    
+    if (isNaN(numValue)) {
+      setValidationErrors(prev => ({ ...prev, [field]: 'Please enter a valid number' }));
+      return;
+    }
+
+    const error = validateField(field, numValue);
+    setValidationErrors(prev => ({ ...prev, [field]: error || undefined }));
+
+    setFormData(prev => ({ ...prev, [field]: numValue }));
+  };
+
+  const resetToExample = () => {
+    setFormData(initialFormData);
+    setValidationErrors({});
+    setResult(null);
+    setError(null);
+  };
+
+  const handleSubmit = async () => {
+    // Check for validation errors
+    const errors: ValidationErrors = {};
+    Object.keys(formData).forEach((field) => {
+      const error = validateField(field as keyof FormData, formData[field as keyof FormData]);
+      if (error) {
+        errors[field as keyof FormData] = error;
+      }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setResult(null);
+
+    try {
+      const response = await fetch('/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get prediction');
+      }
+
+      setResult(data);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred while processing your request';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="max-w-3xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-2">Heart Disease Risk Assessment</h1>
+      <p className="mb-4 text-sm text-gray-600">
+        Enter patient information below to assess heart disease risk
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {Object.entries(fieldConfig).map(([field, config]) => (
+          <label key={field} className="grid gap-1 text-sm">
+            <span className="font-medium">{config.label}</span>
+            <input
+              type="number"
+              step={config.step || 1}
+              min={config.min}
+              max={config.max}
+              value={formData[field as keyof FormData]}
+              onChange={(e) => handleInputChange(field as keyof FormData, e.target.value)}
+              className={`px-3 py-2 border rounded-md ${
+                validationErrors[field as keyof FormData] 
+                  ? 'border-red-500 bg-red-50' 
+                  : 'border-gray-300'
+              }`}
+              title={config.hint}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            {validationErrors[field as keyof FormData] && (
+              <span className="text-red-600 text-xs">
+                {validationErrors[field as keyof FormData]}
+              </span>
+            )}
+            <span className="text-xs text-gray-500">{config.hint}</span>
+          </label>
+        ))}
+      </div>
+
+      <div className="mt-4 flex gap-3">
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-60 hover:bg-blue-700 transition-colors"
+        >
+          {loading ? 'Predicting...' : 'Predict Risk'}
+        </button>
+        <button
+          onClick={resetToExample}
+          className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          Reset to Example
+        </button>
+      </div>
+
+      {error && (
+        <div className="mt-3 p-3 border border-red-300 bg-red-50 text-red-700 rounded-md">
+          Error: {error}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      )}
+
+      {result && (
+        <div className="mt-4 p-3 border rounded-md bg-green-50 border-green-200">
+          <div className="font-medium mb-2">Prediction Results:</div>
+          <div className="mb-1">
+            <strong>Risk Assessment:</strong> {result.prediction === 1 ? 'At Risk' : 'Not at Risk'}
+          </div>
+          <div className="mb-2">
+            <strong>Risk Score:</strong> {result.risk_score.toFixed(3)}
+          </div>
+          <p className="text-xs text-gray-600 mt-2">
+            This tool is for educational purposes and not a medical diagnosis.
+          </p>
+        </div>
+      )}
+    </main>
   );
 }
