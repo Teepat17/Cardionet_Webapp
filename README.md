@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cardio Frontend - Heart Disease Risk Assessment
 
-## Getting Started
+A Next.js 14+ application for heart disease risk assessment using machine learning.
 
-First, run the development server:
+## Features
 
+- Responsive form with 13 medical parameters
+- Real-time validation
+- Integration with FastAPI backend
+- Clean, accessible UI with Tailwind CSS
+
+## Setup
+
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create `.env.local` file:
+```bash
+BACKEND_URL=https://<your-railway-subdomain>.up.railway.app
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Run development server:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-## Learn More
+## Form Fields
 
-To learn more about Next.js, take a look at the following resources:
+- **Age**: Patient age (1-120 years)
+- **Sex**: Gender (0: Female, 1: Male)
+- **Chest Pain Type**: Type of chest pain (0-3)
+- **Resting Blood Pressure**: Blood pressure in mm Hg (80-220)
+- **Serum Cholesterol**: Cholesterol level in mg/dl (100-600)
+- **Fasting Blood Sugar**: Blood sugar level (0: ≤120 mg/dl, 1: >120 mg/dl)
+- **Resting ECG**: ECG results (0-2)
+- **Max Heart Rate**: Maximum heart rate achieved (60-220)
+- **Exercise Induced Angina**: Angina during exercise (0: No, 1: Yes)
+- **ST Depression**: ST depression induced by exercise (0.0-6.0)
+- **ST Slope**: Slope of peak exercise ST segment (0-2)
+- **Major Vessels**: Number of major vessels colored by fluoroscopy (0-4)
+- **Thalassemia**: Thalassemia type (1: Fixed defect, 2: Normal, 3: Reversible defect)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment on Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Set environment variable `BACKEND_URL` in Vercel dashboard
+4. Deploy automatically
 
-## Deploy on Vercel
+## API Routes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `POST /api/predict`: Proxies requests to the backend API
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Tech Stack
+
+- Next.js 14+ (App Router)
+- TypeScript
+- Tailwind CSS
+- FastAPI Backend (separate repository)
+"# Cardionet_Webapp" 
