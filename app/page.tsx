@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 type FormData = {
   age: number;
@@ -35,57 +35,180 @@ const initialFormData: FormData = {
   thal: 2
 };
 
-type FieldConfig = {
-  label: string;
-  min: number;
-  max: number;
-  step?: number;
-  hint: string;
-};
-
-const fieldConfig: Record<string, FieldConfig> = {
-  age: { label: 'Age', min: 1, max: 120, hint: 'Age in years' },
-  sex: { label: 'Sex', min: 0, max: 1, hint: '0: Female, 1: Male' },
-  cp: { label: 'Chest Pain Type', min: 0, max: 3, hint: 'Chest pain type (0-3)' },
-  trestbps: { label: 'Resting Blood Pressure', min: 80, max: 220, hint: 'mm Hg' },
-  chol: { label: 'Serum Cholesterol', min: 100, max: 600, hint: 'mg/dl' },
-  fbs: { label: 'Fasting Blood Sugar', min: 0, max: 1, hint: '0: ≤120 mg/dl, 1: >120 mg/dl' },
-  restecg: { label: 'Resting ECG', min: 0, max: 2, hint: 'Resting ECG results (0-2)' },
-  thalach: { label: 'Max Heart Rate', min: 60, max: 220, hint: 'Maximum heart rate achieved' },
-  exang: { label: 'Exercise Induced Angina', min: 0, max: 1, hint: '0: No, 1: Yes' },
-  oldpeak: { label: 'ST Depression', min: 0, max: 6, step: 0.1, hint: 'ST depression induced by exercise' },
-  slope: { label: 'ST Slope', min: 0, max: 2, hint: 'Slope of peak exercise ST segment' },
-  ca: { label: 'Major Vessels', min: 0, max: 4, hint: 'Number of major vessels colored by fluoroscopy' },
-  thal: { label: 'Thalassemia', min: 1, max: 3, hint: '1: Fixed defect, 2: Normal, 3: Reversible defect' }
-};
+const questions = [
+  {
+    key: 'age' as keyof FormData,
+    question: 'คุณอายุเท่าไร?',
+    type: 'number',
+    min: 1,
+    max: 120,
+    placeholder: 'กรอกอายุ (1-120 ปี)',
+    hint: 'อายุเป็นปี'
+  },
+  {
+    key: 'sex' as keyof FormData,
+    question: 'คุณเป็นเพศอะไร?',
+    type: 'select',
+    options: [
+      { value: 0, label: 'หญิง' },
+      { value: 1, label: 'ชาย' }
+    ]
+  },
+  {
+    key: 'cp' as keyof FormData,
+    question: 'คุณมีอาการเจ็บหน้าอกแบบไหน?',
+    type: 'select',
+    options: [
+      { value: 0, label: 'Typical angina (เจ็บหน้าอกแบบทั่วไป)' },
+      { value: 1, label: 'Atypical angina (เจ็บหน้าอกแบบไม่ทั่วไป)' },
+      { value: 2, label: 'Non-anginal pain (เจ็บหน้าอกที่ไม่ใช่จากหัวใจ)' },
+      { value: 3, label: 'ไม่มีอาการเจ็บหน้าอก' }
+    ],
+    info: 'Typical angina: เจ็บหน้าอกที่เกิดจากหัวใจขาดเลือด, Atypical angina: เจ็บหน้าอกที่ไม่ใช่จากหัวใจขาดเลือด, Non-anginal pain: เจ็บหน้าอกจากสาเหตุอื่น'
+  },
+  {
+    key: 'trestbps' as keyof FormData,
+    question: 'ความดันโลหิตขณะพักของคุณเท่าไร?',
+    type: 'number',
+    min: 80,
+    max: 220,
+    placeholder: 'กรอกความดันโลหิต (80-220 mmHg)',
+    hint: 'mmHg (มิลลิเมตรปรอท)'
+  },
+  {
+    key: 'chol' as keyof FormData,
+    question: 'ระดับคอเลสเตอรอลในเลือดของคุณเท่าไร?',
+    type: 'number',
+    min: 100,
+    max: 600,
+    placeholder: 'กรอกระดับคอเลสเตอรอล (100-600 mg/dl)',
+    hint: 'mg/dl (มิลลิกรัมต่อเดซิลิตร)'
+  },
+  {
+    key: 'fbs' as keyof FormData,
+    question: 'น้ำตาลในเลือดขณะอดอาหารของคุณมากกว่า 120 mg/dl หรือไม่?',
+    type: 'select',
+    options: [
+      { value: 0, label: 'ไม่ (≤120 mg/dl)' },
+      { value: 1, label: 'ใช่ (>120 mg/dl)' }
+    ]
+  },
+  {
+    key: 'restecg' as keyof FormData,
+    question: 'ผลตรวจหัวใจของคุณ (ตอนพัก) เป็นแบบไหน?',
+    type: 'select',
+    options: [
+      { value: 0, label: 'หัวใจเต้นปกติ' },
+      { value: 1, label: 'หัวใจมีการเต้นผิดจังหวะเล็กน้อย (คลื่นไฟฟ้าบางส่วนผิดปกติ)' },
+      { value: 2, label: 'หัวใจห้องล่างซ้ายโต (ผนังหัวใจหนาขึ้น)' }
+    ],
+    info: 'ST-T wave abnormality: การเปลี่ยนแปลงของคลื่น ST หรือ T ที่อาจบ่งชี้ถึงปัญหาหัวใจ, Left ventricular hypertrophy: หัวใจห้องล่างซ้ายโตขึ้นจากการทำงานหนัก'
+  },
+  {
+    key: 'thalach' as keyof FormData,
+    question: 'อัตราการเต้นของหัวใจสูงสุดที่คุณทำได้เท่าไร?',
+    type: 'number',
+    min: 60,
+    max: 220,
+    placeholder: 'กรอกอัตราการเต้นของหัวใจสูงสุด (60-220)',
+    hint: 'beats per minute (ครั้งต่อนาที)'
+  },
+  {
+    key: 'exang' as keyof FormData,
+    question: 'คุณมีอาการเจ็บหน้าอกขณะออกกำลังกายหรือไม่?',
+    type: 'select',
+    options: [
+      { value: 0, label: 'ไม่' },
+      { value: 1, label: 'ใช่' }
+    ]
+  },
+  {
+    key: 'oldpeak' as keyof FormData,
+    question: 'หลังออกแรง/ออกกำลังกาย คลื่นหัวใจของคุณลดลงกี่มิลลิเมตร?',
+    type: 'number',
+    min: 0,
+    max: 6,
+    step: 0.1,
+    placeholder: 'กรอกค่า ST depression (0.0-6.0 mm)',
+    hint: 'mm (มิลลิเมตร)',
+    info: 'ST depression: การลดลงของคลื่น ST ในคลื่นไฟฟ้าหัวใจที่อาจบ่งชี้ถึงการขาดเลือดไปเลี้ยงกล้ามเนื้อหัวใจ'
+  },
+  {
+    key: 'slope' as keyof FormData,
+    question: 'ความชันของคลื่น ST ขณะออกกำลังกายสูงสุดของคุณเป็นอย่างไร?',
+    type: 'select',
+    options: [
+      { value: 0, label: 'Upsloping (ชันขึ้น)' },
+      { value: 1, label: 'Flat (ราบ)' },
+      { value: 2, label: 'Downsloping (ชันลง)' }
+    ],
+    info: 'ความชันของคลื่น ST: บ่งชี้ถึงการตอบสนองของหัวใจต่อการออกกำลังกาย, Downsloping อาจบ่งชี้ถึงปัญหาหัวใจ'
+  },
+  {
+    key: 'ca' as keyof FormData,
+    question: 'ตอนหมอฉีดสีตรวจหัวใจ พบว่ามีหลอดเลือดหัวใจใหญ่กี่เส้นที่ตีบ?',
+    type: 'select',
+    options: [
+      { value: 0, label: 'ไม่มีหลอดเลือดใหญ่ตีบ' },
+      { value: 1, label: 'มีหลอดเลือดใหญ่ตีบ 1 เส้น' },
+      { value: 2, label: 'มีหลอดเลือดใหญ่ตีบ 2 เส้น' },
+      { value: 3, label: 'มีหลอดเลือดใหญ่ตีบ 3 เส้น' },
+      { value: 4, label: 'มีหลอดเลือดใหญ่ตีบ 4 เส้น' }
+    ],
+    info: 'หลอดเลือดหลัก: หลอดเลือดโคโรนารีที่เลี้ยงกล้ามเนื้อหัวใจ, การฉีดสีช่วยให้เห็นการตีบตันของหลอดเลือด, จำนวนหลอดเลือดที่ตีบตันบ่งชี้ความรุนแรงของโรค'
+  },
+  {
+    key: 'thal' as keyof FormData,
+    question: 'คุณมีภาวะธาลัสซีเมียแบบไหน?',
+    type: 'select',
+    options: [
+      { value: 1, label: 'Fixed defect (ข้อบกพร่องถาวร)' },
+      { value: 2, label: 'ปกติ' },
+      { value: 3, label: 'Reversible defect (ข้อบกพร่องที่กลับได้)' }
+    ],
+    info: 'Fixed defect: พื้นที่ที่ไม่มีเลือดไปเลี้ยงอย่างถาวร, Reversible defect: พื้นที่ที่ขาดเลือดชั่วคราวซึ่งอาจกลับมาเป็นปกติได้'
+  }
+];
 
 export default function Home() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ prediction: number; risk_score: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [showForm, setShowForm] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
-  const validateField = (field: keyof FormData, value: number): string | null => {
-    const config = fieldConfig[field];
-    if (value < config.min || value > config.max) {
-      return `Must be between ${config.min} and ${config.max}`;
-    }
-    return null;
-  };
+  useEffect(() => {
+    // Animate form appearance
+    const timer = setTimeout(() => setShowForm(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
-    const numValue = field === 'oldpeak' ? parseFloat(value) : parseInt(value);
+  const handleInputChange = (field: keyof FormData, value: string | number) => {
+    const numValue = typeof value === 'string' ? 
+      (field === 'oldpeak' ? parseFloat(value) : parseInt(value)) : value;
     
-    if (isNaN(numValue)) {
+    if (typeof numValue === 'number' && isNaN(numValue)) {
       setValidationErrors(prev => ({ ...prev, [field]: 'Please enter a valid number' }));
       return;
     }
 
-    const error = validateField(field, numValue);
-    setValidationErrors(prev => ({ ...prev, [field]: error || undefined }));
-
+    setValidationErrors(prev => ({ ...prev, [field]: undefined }));
     setFormData(prev => ({ ...prev, [field]: numValue }));
+  };
+
+  const nextQuestion = () => {
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(prev => prev + 1);
+    }
+  };
+
+  const prevQuestion = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(prev => prev - 1);
+    }
   };
 
   const resetToExample = () => {
@@ -93,23 +216,10 @@ export default function Home() {
     setValidationErrors({});
     setResult(null);
     setError(null);
+    setCurrentQuestion(0);
   };
 
   const handleSubmit = async () => {
-    // Check for validation errors
-    const errors: ValidationErrors = {};
-    Object.keys(formData).forEach((field) => {
-      const error = validateField(field as keyof FormData, formData[field as keyof FormData]);
-      if (error) {
-        errors[field as keyof FormData] = error;
-      }
-    });
-
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
-
     setLoading(true);
     setError(null);
     setResult(null);
@@ -136,77 +246,180 @@ export default function Home() {
     }
   };
 
+  const currentQ = questions[currentQuestion];
+
   return (
-    <main className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-2">Heart Disease Risk Assessment</h1>
-      <p className="mb-4 text-sm text-gray-600">
-        Enter patient information below to assess heart disease risk
-      </p>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {Object.entries(fieldConfig).map(([field, config]) => (
-          <label key={field} className="grid gap-1 text-sm">
-            <span className="font-medium">{config.label}</span>
-            <input
-              type="number"
-              step={config.step || 1}
-              min={config.min}
-              max={config.max}
-              value={formData[field as keyof FormData]}
-              onChange={(e) => handleInputChange(field as keyof FormData, e.target.value)}
-              className={`px-3 py-2 border rounded-md ${
-                validationErrors[field as keyof FormData] 
-                  ? 'border-red-500 bg-red-50' 
-                  : 'border-gray-300'
-              }`}
-              title={config.hint}
-            />
-            {validationErrors[field as keyof FormData] && (
-              <span className="text-red-600 text-xs">
-                {validationErrors[field as keyof FormData]}
-              </span>
-            )}
-            <span className="text-xs text-gray-500">{config.hint}</span>
-          </label>
-        ))}
-      </div>
-
-      <div className="mt-4 flex gap-3">
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-60 hover:bg-blue-700 transition-colors"
-        >
-          {loading ? 'Predicting...' : 'Predict Risk'}
-        </button>
-        <button
-          onClick={resetToExample}
-          className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
-        >
-          Reset to Example
-        </button>
-      </div>
-
-      {error && (
-        <div className="mt-3 p-3 border border-red-300 bg-red-50 text-red-700 rounded-md">
-          Error: {error}
-        </div>
-      )}
-
-      {result && (
-        <div className="mt-4 p-3 border rounded-md bg-green-50 border-green-200">
-          <div className="font-medium mb-2">Prediction Results:</div>
-          <div className="mb-1">
-            <strong>Risk Assessment:</strong> {result.prediction === 1 ? 'At Risk' : 'Not at Risk'}
-          </div>
-          <div className="mb-2">
-            <strong>Risk Score:</strong> {result.risk_score.toFixed(3)}
-          </div>
-          <p className="text-xs text-gray-600 mt-2">
-            This tool is for educational purposes and not a medical diagnosis.
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      <div className="max-w-4xl mx-auto p-6">
+        <div className={`transition-all duration-700 ${showForm ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <h1 className="text-4xl font-bold text-white mb-2 text-center">
+            การประเมินความเสี่ยงโรคหัวใจ
+          </h1>
+          <p className="text-blue-200 text-center mb-8">
+            ตอบคำถามไม่กี่ข้อเพื่อประเมินความเสี่ยงโรคหัวใจของคุณ
           </p>
+
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <div className="flex justify-between text-sm text-blue-200 mb-2">
+              <span>คำถามที่ {currentQuestion + 1} จาก {questions.length}</span>
+              <span>{Math.round(((currentQuestion + 1) / questions.length) * 100)}%</span>
+            </div>
+            <div className="w-full bg-slate-700 rounded-full h-2">
+              <div 
+                className="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Question Card */}
+          <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 shadow-2xl">
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-semibold text-white">
+                  {currentQ.question}
+                </h2>
+                {currentQ.info && (
+                  <button
+                    onClick={() => setShowInfo(!showInfo)}
+                    className="text-blue-300 hover:text-blue-200 text-sm underline transition-colors duration-200"
+                  >
+                    {showInfo ? 'ซ่อนข้อมูล' : 'ข้อมูลเพิ่มเติม'}
+                  </button>
+                )}
+              </div>
+              
+              {showInfo && currentQ.info && (
+                <div className="mb-4 p-4 bg-blue-900/30 border border-blue-700/50 rounded-lg text-blue-200 text-sm">
+                  <strong>ข้อมูลเพิ่มเติม:</strong> {currentQ.info}
+                </div>
+              )}
+              
+              {currentQ.type === 'number' ? (
+                <div>
+                  <input
+                    type="number"
+                    step={currentQ.step || 1}
+                    min={currentQ.min}
+                    max={currentQ.max}
+                    value={formData[currentQ.key]}
+                    onChange={(e) => handleInputChange(currentQ.key, e.target.value)}
+                    placeholder={currentQ.placeholder}
+                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  />
+                  {currentQ.hint && (
+                    <p className="text-sm text-slate-400 mt-2">{currentQ.hint}</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {currentQ.options?.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => handleInputChange(currentQ.key, option.value)}
+                      className={`w-full p-4 text-left rounded-lg border transition-all duration-200 ${
+                        formData[currentQ.key] === option.value
+                          ? 'bg-blue-600 border-blue-500 text-white shadow-lg'
+                          : 'bg-slate-700/50 border-slate-600 text-slate-200 hover:bg-slate-700 hover:border-slate-500'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {validationErrors[currentQ.key] && (
+                <p className="text-red-400 text-sm mt-2">{validationErrors[currentQ.key]}</p>
+              )}
         </div>
-      )}
-    </main>
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-between">
+              <button
+                onClick={prevQuestion}
+                disabled={currentQuestion === 0}
+                className="px-6 py-3 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                ก่อนหน้า
+              </button>
+
+              {currentQuestion < questions.length - 1 ? (
+                <button
+                  onClick={nextQuestion}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-200 shadow-lg"
+                >
+                  ถัดไป
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-60 transition-all duration-200 shadow-lg"
+                >
+                  {loading ? 'กำลังวิเคราะห์...' : 'ดูผลการประเมิน'}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Reset Button */}
+          <div className="text-center mt-6">
+            <button
+              onClick={resetToExample}
+              className="text-blue-300 hover:text-blue-200 text-sm underline transition-colors duration-200"
+            >
+              ตั้งค่าเริ่มต้นใหม่
+            </button>
+          </div>
+
+          {/* Error Display */}
+          {error && (
+            <div className="mt-6 p-4 bg-red-900/50 border border-red-700 rounded-lg text-red-200">
+              <strong>เกิดข้อผิดพลาด:</strong> {error}
+            </div>
+          )}
+
+          {/* Result Popup */}
+          {result && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <div className="bg-slate-800/95 border border-slate-700/50 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold text-white mb-6">ผลการประเมิน</h3>
+                  <div className="space-y-4 mb-6">
+                    <div className="flex items-center justify-center space-x-3">
+                      <span className="text-slate-300">ระดับความเสี่ยง:</span>
+                      <span className={`px-4 py-2 rounded-full text-sm font-medium ${
+                        result.prediction === 1 
+                          ? 'bg-red-600/50 text-red-200 border border-red-500/50' 
+                          : 'bg-green-600/50 text-green-200 border border-green-500/50'
+                      }`}>
+                        {result.prediction === 1 ? 'มีความเสี่ยง' : 'ไม่มีความเสี่ยง'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-center space-x-3">
+                      <span className="text-slate-300">คะแนนความเสี่ยง:</span>
+                      <span className="text-white font-mono text-lg">
+                        {(result.risk_score * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-400 mb-6 italic">
+                    ⚠️ เครื่องมือนี้ใช้เพื่อการศึกษาเท่านั้น ไม่ใช่การวินิจฉัยทางการแพทย์
+                  </p>
+                  <button
+                    onClick={() => setResult(null)}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                  >
+                    ปิด
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

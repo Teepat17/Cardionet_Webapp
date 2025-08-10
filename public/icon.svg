@@ -1,0 +1,15 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="96" cy="96" r="90" fill="#1e40af" stroke="#3b82f6" stroke-width="4"/>
+  
+  <!-- Heart shape -->
+  <path d="M96 48C90 42 72 42 66 48C60 54 60 72 66 78L96 108L126 78C132 72 132 54 126 48C120 42 102 42 96 48Z" fill="#ef4444"/>
+  
+  <!-- ECG line -->
+  <path d="M48 132L60 120L72 132L84 108L96 132L108 120L120 132L132 108L144 132" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Network dots -->
+  <circle cx="72" cy="156" r="9" fill="#ffffff"/>
+  <circle cx="96" cy="156" r="9" fill="#ffffff"/>
+  <circle cx="120" cy="156" r="9" fill="#ffffff"/>
+</svg>
