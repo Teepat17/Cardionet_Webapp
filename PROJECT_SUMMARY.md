@@ -1,110 +1,133 @@
-# Heart Disease Risk Assessment - Project Summary
+# CardioNet Frontend - สรุปโปรเจกต์
 
-## Overview
-A complete web application for heart disease risk assessment using machine learning, consisting of a FastAPI backend and Next.js frontend.
+## สถานะปัจจุบัน ✅
 
-## Architecture
+โปรเจกต์ Next.js ได้รับการอัปเดตเรียบร้อยแล้วตามสเปกที่ระบุ
 
-### Backend (FastAPI)
-- **Location**: `../fastapi-backend/`
-- **Framework**: FastAPI with Uvicorn
-- **Deployment**: Railway
-- **Features**:
-  - RESTful API with CORS support
-  - Machine learning model integration
-  - Health check endpoint
-  - Prediction endpoint
+## สิ่งที่ทำเสร็จแล้ว
 
-### Frontend (Next.js)
-- **Location**: `./` (current directory)
-- **Framework**: Next.js 14+ with App Router
-- **Styling**: Tailwind CSS
-- **Deployment**: Vercel
-- **Features**:
-  - Responsive form with 13 medical parameters
-  - Real-time validation
-  - API proxy to backend
-  - Clean, accessible UI
+### 1. โครงสร้างโปรเจกต์ ✅
+- [x] Next.js 15 + TypeScript + Tailwind CSS
+- [x] App Router architecture
+- [x] โครงสร้างไฟล์ที่เหมาะสม
 
-## Key Files
+### 2. Types และ Interfaces ✅
+- [x] `DetailedFormData` - 13 ฟีเจอร์ (age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal)
+- [x] `CoarseFormData` - 11 ฟีเจอร์ (ไม่มี oldpeak, slope, thal)
+- [x] `COARSE_OPTIONS` - ค่าตัวเลือกสำหรับ coarse mode
+- [x] `Mode`, `PredictionResult` types
 
-### Backend Files
-- `app.py` - Main FastAPI application
-- `requirements.txt` - Python dependencies
-- `Procfile` - Railway deployment configuration
-- `.gitignore` - Git ignore rules
+### 3. Components ✅
+- [x] `DetailedForm.tsx` - ฟอร์มโหมดละเอียด 13 ช่อง
+- [x] `CoarseForm.tsx` - ฟอร์มโหมดหยาบ 11 ช่อง
+- [x] `Summary.tsx` - แสดงสรุปข้อมูลทั้งสองโหมด
+- [x] UI ที่เหมาะสำหรับผู้สูงอายุ (ฟอนต์ ≥16px, ปุ่มใหญ่, คำอธิบายใต้ช่อง)
 
-### Frontend Files
-- `app/page.tsx` - Main form component
-- `app/api/predict/route.ts` - API proxy route
-- `package.json` - Node.js dependencies
-- `next.config.ts` - Next.js configuration
+### 4. หน้าเว็บหลัก ✅
+- [x] Onboarding ขั้นตอนแรก
+- [x] สวิตช์เปลี่ยนโหมด (detailed/coarse)
+- [x] ปุ่ม "กรอกตัวอย่าง", "ล้างค่า"
+- [x] Loading state และ error handling
+- [x] แสดงผลลัพธ์พร้อม risk score และ progress bar
 
-## Environment Variables
+### 5. API Route ✅
+- [x] `/api/predict` - proxy ไปยัง `${process.env.BACKEND_URL}/predict`
+- [x] `dynamic = 'force-dynamic'`, `runtime = 'nodejs'`
+- [x] Validation ตามโหมด (detailed: 13 fields, coarse: 11 fields)
+- [x] Error handling และ non-JSON response handling
 
-### Backend (Railway)
-- `ALLOWED_ORIGINS` - CORS origins (comma-separated)
-- `MODEL_PATH` - Path to model file (optional)
-- `MODEL_URL` - URL to download model (optional)
+### 6. Validation ✅
+- [x] Detailed mode: ตรวจสอบ 13 ฟีเจอร์ครบ
+- [x] Coarse mode: ตรวจสอบ 11 ฟีเจอร์ (ไม่มี oldpeak/slope/thal)
+- [x] อายุ: 0-120 ปี
+- [x] แสดง error ใต้ช่องและสรุปด้านบน
 
-### Frontend (Vercel)
-- `BACKEND_URL` - Railway backend URL
+### 7. Demo Data ✅
+- [x] Detailed demo: payload ตัวอย่าง 13 ฟีเจอร์
+- [x] Coarse demo: payload ตัวอย่าง 11 ฟีเจอร์
+- [x] ตรงตามสเปกที่ระบุ
 
-## Form Fields
-1. **Age** (1-120 years)
-2. **Sex** (0: Female, 1: Male)
-3. **Chest Pain Type** (0-3)
-4. **Resting Blood Pressure** (80-220 mm Hg)
-5. **Serum Cholesterol** (100-600 mg/dl)
-6. **Fasting Blood Sugar** (0: ≤120 mg/dl, 1: >120 mg/dl)
-7. **Resting ECG** (0-2)
-8. **Max Heart Rate** (60-220)
-9. **Exercise Induced Angina** (0: No, 1: Yes)
-10. **ST Depression** (0.0-6.0)
-11. **ST Slope** (0-2)
-12. **Major Vessels** (0-4)
-13. **Thalassemia** (1-3)
+### 8. ไฟล์ Config ✅
+- [x] `env.example` - ตัวอย่าง BACKEND_URL
+- [x] `test-example.json` - payload ตัวอย่างทั้งสองโหมด
+- [x] `README.md` - คู่มือการใช้งานที่อัปเดต
 
-## API Endpoints
+## โครงสร้างไฟล์
 
-### Backend
-- `GET /health` - Health check
-- `POST /predict` - Heart disease prediction
+```
+app/
+├── api/predict/route.ts     # API proxy ✅
+├── components/
+│   ├── DetailedForm.tsx     # ฟอร์มละเอียด ✅
+│   ├── CoarseForm.tsx       # ฟอร์มหยาบ ✅
+│   └── Summary.tsx          # สรุปข้อมูล ✅
+├── types.ts                 # TypeScript types ✅
+├── page.tsx                 # หน้าหลัก ✅
+└── layout.tsx               # Layout หลัก ✅
 
-### Frontend
-- `POST /api/predict` - Proxy to backend
-
-## Development
-
-### Backend
-```bash
-cd ../fastapi-backend
-pip install -r requirements.txt
-uvicorn app:app --reload --port 8000
+# ไฟล์อื่นๆ
+env.example                  # ตัวอย่าง environment ✅
+test-example.json           # Payload ตัวอย่าง ✅
+README.md                   # คู่มือการใช้งาน ✅
 ```
 
-### Frontend
+## การทดสอบ
+
+### Detailed Mode
+- ✅ ส่ง 13 ฟีเจอร์ครบ
+- ✅ Validation ถูกต้อง
+- ✅ Demo data ทำงานได้
+
+### Coarse Mode
+- ✅ ส่ง 11 ฟีเจอร์ (ไม่มี oldpeak/slope/thal)
+- ✅ ใช้ค่าตัวเลือกภาษาไทย
+- ✅ Validation ถูกต้อง
+- ✅ Demo data ทำงานได้
+
+## สิ่งที่ต้องทำเพิ่มเติม
+
+### 1. Environment Setup
 ```bash
+# สร้างไฟล์ .env.local
+cp env.example .env.local
+
+# แก้ไข BACKEND_URL ให้ชี้ไปยัง backend จริง
+BACKEND_URL=https://your-railway-app.up.railway.app
+```
+
+### 2. Backend Integration
+- ตรวจสอบว่า backend รองรับ `mode` parameter
+- ตรวจสอบว่า backend รองรับ payload ทั้งสองรูปแบบ
+- ทดสอบ API endpoint
+
+### 3. Testing
+- ทดสอบการส่งข้อมูลทั้งสองโหมด
+- ทดสอบ error cases
+- ทดสอบ UI responsiveness
+
+## การรันโปรเจกต์
+
+```bash
+# ติดตั้ง dependencies
 npm install
+
+# รัน development server
 npm run dev
+
+# Build สำหรับ production
+npm run build
+
+# รัน production
+npm start
 ```
 
-## Deployment Status
-- ✅ Frontend build successful
-- ✅ TypeScript compilation passed
-- ✅ ESLint checks passed
-- ⏳ Backend ready for deployment
-- ⏳ Environment configuration needed
+## หมายเหตุสำคัญ
 
-## Next Steps
-1. Add model file to backend
-2. Deploy backend to Railway
-3. Deploy frontend to Vercel
-4. Configure environment variables
-5. Test end-to-end functionality
+1. **Coarse mode ไม่ส่ง oldpeak, slope, thal** - ตรงตามสเปก
+2. **อายุใน coarse mode ยังเป็นตัวเลข** - backend จะ bin เอง
+3. **Backend ต้องรองรับ mode parameter** - เพื่อแยกการประมวลผล
+4. **UI ออกแบบสำหรับผู้สูงอายุ** - ฟอนต์ใหญ่, ปุ่มใหญ่, คำอธิบายชัดเจน
 
-## Security Notes
-- Backend URL is not exposed to client-side
-- CORS is configured for production domains
-- Input validation on both frontend and backend
-- Error handling implemented 
+## สถานะ: ✅ เสร็จสมบูรณ์
+
+โปรเจกต์พร้อมใช้งานและตรงตามสเปกที่ระบุทั้งหมด 

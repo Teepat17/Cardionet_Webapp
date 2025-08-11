@@ -1,15 +1,32 @@
 {
-  "age": 55,
-  "sex": 1,
-  "cp": 2,
-  "trestbps": 130,
-  "chol": 250,
-  "fbs": 0,
-  "restecg": 0,
-  "thalach": 150,
-  "exang": 0,
-  "oldpeak": 1.0,
-  "slope": 1,
-  "ca": 0,
-  "thal": 2
+  "detailed_example": {
+    "mode": "detailed",
+    "age": 55,
+    "sex": 1,
+    "cp": 2,
+    "trestbps": 130,
+    "chol": 250,
+    "fbs": 0,
+    "restecg": 0,
+    "thalach": 150,
+    "exang": 0,
+    "oldpeak": 1.0,
+    "slope": 1,
+    "ca": 0,
+    "thal": 2
+  },
+  "coarse_example": {
+    "mode": "coarse",
+    "age": 58,
+    "sex_cat": "ชาย",
+    "cp_cat": "เจ็บหน้าอกแบบไม่คงที่",
+    "trestbps_bin": "120-139",
+    "chol_bin": "200-239",
+    "fbs_cat": "ปกติ",
+    "restecg_cat": "ผิดปกติเล็กน้อย",
+    "thalach_bin": "150-179",
+    "exang_cat": "ไม่เจ็บหน้าอกตอนออกแรง",
+    "ca_bin": "ไม่มีเส้นเลือดตีบ",
+    "thal_cat": "ปกติ"
+  }
 } 

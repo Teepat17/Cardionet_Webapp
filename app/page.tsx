@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Mode, PredictionResult, DetailedFormData, CoarseFormData, FormErrors } from './types';
+import { Mode, PredictionResult, DetailedFormData, CoarseFormData } from './types';
 import { DetailedForm } from './components/DetailedForm';
 import { CoarseForm } from './components/CoarseForm';
 import { DetailedSummary, CoarseSummary } from './components/Summary';
@@ -23,14 +23,14 @@ export default function Home() {
 
   const [coarseData, setCoarseData] = useState<CoarseFormData>({
     age: 0, sex_cat: '', cp_cat: '', trestbps_bin: '', chol_bin: '', fbs_cat: '',
-    restecg_cat: '', thalach_bin: '', exang_cat: '', oldpeak_bin: '', slope_cat: '', ca_bin: '', thal_cat: ''
+    restecg_cat: '', thalach_bin: '', exang_cat: '', ca_bin: '', thal_cat: ''
   });
 
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Validation functions
   const validateDetailedForm = (): boolean => {
-    const newErrors: FormErrors = {};
+    const newErrors: { [key: string]: string } = {};
     
     if (!detailedData.age || detailedData.age < 0 || detailedData.age > 120) {
       newErrors.age = 'กรุณากรอกอายุ (0-120 ปี)';
@@ -53,15 +53,14 @@ export default function Home() {
   };
 
   const validateCoarseForm = (): boolean => {
-    const newErrors: FormErrors = {};
+    const newErrors: { [key: string]: string } = {};
     
     if (!coarseData.age || coarseData.age < 0 || coarseData.age > 120) {
       newErrors.age = 'กรุณากรอกอายุ (0-120 ปี)';
     }
     
     const requiredFields = ['sex_cat', 'cp_cat', 'trestbps_bin', 'chol_bin', 'fbs_cat', 
-                           'restecg_cat', 'thalach_bin', 'exang_cat', 'oldpeak_bin', 
-                           'slope_cat', 'ca_bin', 'thal_cat'];
+                           'restecg_cat', 'thalach_bin', 'exang_cat', 'ca_bin', 'thal_cat'];
     
     requiredFields.forEach(field => {
       if (!coarseData[field as keyof CoarseFormData]) {
@@ -119,7 +118,7 @@ export default function Home() {
     });
     setCoarseData({
       age: 0, sex_cat: '', cp_cat: '', trestbps_bin: '', chol_bin: '', fbs_cat: '',
-      restecg_cat: '', thalach_bin: '', exang_cat: '', oldpeak_bin: '', slope_cat: '', ca_bin: '', thal_cat: ''
+      restecg_cat: '', thalach_bin: '', exang_cat: '', ca_bin: '', thal_cat: ''
     });
     setPrediction(null);
     setErrors({});
@@ -148,8 +147,8 @@ export default function Home() {
   const coarseDemoData: CoarseFormData = {
     age: 58, sex_cat: 'ชาย', cp_cat: 'เจ็บหน้าอกแบบไม่คงที่', trestbps_bin: '120-139', 
     chol_bin: '200-239', fbs_cat: 'ปกติ', restecg_cat: 'ผิดปกติเล็กน้อย', 
-    thalach_bin: '150-179', exang_cat: 'ไม่เจ็บหน้าอกตอนออกแรง', oldpeak_bin: '0.1-1.9', 
-    slope_cat: 'แบน', ca_bin: 'ไม่มีเส้นเลือดตีบ', thal_cat: 'ปกติ'
+    thalach_bin: '150-179', exang_cat: 'ไม่เจ็บหน้าอกตอนออกแรง', 
+    ca_bin: 'ไม่มีเส้นเลือดตีบ', thal_cat: 'ปกติ'
   };
 
   // Onboarding step
@@ -162,7 +161,7 @@ export default function Home() {
           </h1>
           
           <p className="text-lg text-center text-gray-600 mb-8">
-            คุณมีข้อมูลแบบละเอียด (ตัวเลขจริง) หรือไม่?
+            คุณมีข้อมูลทางการแพทย์แบบละเอียด (ตัวเลขจริง) หรือไม่?
           </p>
 
           <div className="space-y-4">
